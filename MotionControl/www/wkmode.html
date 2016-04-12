@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="UTF-8">
+	<meta content="IE=edge" http-equiv="X-UA-Compatible">
+	<meta content="initial-scale=1.0, width=device-width" name="viewport">
+	<title>CTA pSCT MC Wakeley Mode</title>
+
+	<!-- css -->
+	<link href="css/base.min.css" rel="stylesheet">
+
+	<!-- css for this project -->
+	<link href="css/project.min.css" rel="stylesheet">
+	
+    <!-- js for this project -->
+	<script type="text/javascript" src="zepto.min.js"></script>
+    <script src="js/project.min.js"></script>
+    <script type="text/javascript">
+        var motors = 'All';
+        var dir = '+';
+        var steps = '0';
+        var verticalFactor = 1;
+        var angleFactorPitch = 1;
+        var angleFactorRoll =1;
+        var status='';
+        function Vert( ) {
+            motors = 'All';
+            dir = document.getElementById('dirVert').value;
+            steps = (parseInt(document.getElementById('stepsVert').value)*verticalFactor).toString();
+        }
+    function Roll( ) {
+        dir = document.getElementById('dirRoll').value;
+        //if +, ab up
+        //if -, ab down
+        //measure distance from balljoint on a to ball joint on c and distance from b to c the trig to find media length (hypotenuse) and distance moved is the side length
+        motors = 'AB';
+        steps = (parseInt(document.getElementById('stepsRoll').value)*angleFactorRoll).toString();
+    }
+    function Pitch( ) {
+        dir = document.getElementById('dirPitch').value;
+        //if +, a up
+        //if -, b up
+        //measure from ball joint a to ball joint b is hypotenuse and distance moved is angle
+        if(dir =='+'){
+            motors = 'A';
+        };
+        if(dir =='-'){
+            motors = 'B';
+            dir = '+';
+        };
+        steps = parseInt(document.getElementById('stepsPitch').value);
+        if((steps%2)==1){
+            steps+=1;
+        }
+        steps=steps.toString();
+    }
+    function A( ) {
+        motors = 'A';
+        dir = document.getElementById('dirA').value;
+        steps = (parseInt(document.getElementById('stepsA').value)*verticalFactor).toString();
+    }
+     var aint;
+    function B( ) {
+        motors = 'B';
+        dir = document.getElementById('dirB').value;
+        steps = (parseInt(document.getElementById('stepsB').value)*verticalFactor).toString();
+        $.get('/arduino/getPos',getPosition);
+        $.get('/arduino/getRng',getRange);
+        
+    }
+    function getPosition(data){
+        aint=data;
+        alert(aint);
+    }
+    function getRange(data){
+        aint=data;
+        alert(aint);
+    }
+    function C( ) {
+        motors = 'C';
+        dir = document.getElementById('dirC').value;
+        steps = (parseInt(document.getElementById('stepsC').value)*verticalFactor).toString();
+    }
+    function stepMotor( ) {
+        document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
+        $('#info').load((('/arduino/'.concat(dir.concat('/'))).concat(steps.concat('/'))).concat(motors),function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
+    function pitch2( ) {
+        document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
+        $('#info').load((('/arduino/'.concat('-'.concat('/'))).concat(steps).concat('/')).concat('CS'),function(){status = String(document.getElementById('info').innerHTML);stepMotor()});
+        
+    }
+    function interrupted() {
+        document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
+        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Interuptions: ");
+        $('#info').load('/arduino/interruptions',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
+    function range() {
+        document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
+        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Ranging: ");
+        $('#info').load('/arduino/setRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
+    function getRng() {
+        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Getting Range: ");
+        $('#info').load('/arduino/getRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
+    function getPos() {
+        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Getting Position: ");
+        $('#info').load('/arduino/getPos',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
+    function getAlgn() {
+        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Getting Alignment: ");
+        $('#info').load('/arduino/getAlgn',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
+    function setAlgn() {
+        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Setting Alignment: ");
+        $('#info').load('/arduino/setAlgn',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
+
+    function clearStatus() {
+        status = "";
+        document.getElementById('info').innerHTML = status;
+    }
+    </script>
+    </head>
+	</head>
+    <body class="avoid-fout" onload="setInterval(refresh, 50);">
+		<div class="content">
+			<div class="content-heading">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-6 col-lg-push-3 col-sm-10 col-sm-push-1">
+							<h1 class="alarge" onClick="location.href='index.html'">pSCT Motion Control</h1>
+						</div>
+                    </div>
+				</div>
+			</div>
+		</div>
+        <div class="content">
+            <div class="container">
+                <section class="content-inner">
+                    <h2 class="content-sub-heading">Move the Camera!</h2>
+                      <div class="card-wrap">
+                          <div class="row">
+                              <div class="col-lg-4 col-sm-11">
+                                  <div class="card">
+                                      <div class="card-main">
+                                          <div class="card-inner">
+                                              <p class="card-heading">Status:</p>
+                                              <span class="text-green" id="info"></span>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:clearStatus()" id="vertical"><span class="text-blue">Clear</span></a>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:range()" id="vertical"><span class="text-blue">Range</span></a>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:getRng()" id="vertical"><span class="text-blue">getRng</span></a>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:getPos()" id="vertical"><span class="text-blue">getPos</span></a>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:getAlgn()" id="vertical"><span class="text-blue">getAlgn</span></a>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:setAlgn()" id="vertical"><span class="text-blue">setAlgn</span></a>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-lg-4 col-sm-4">
+                                  <div class="card">
+                                      <div class="card-main">
+                                          <div class="card-inner">
+                                              <p class="card-heading">Vertical</p>
+                                              <p>Input steps to move (1 step ~ 1.02 microns)</p>
+                                              <input class="form-control" id="stepsVert" type="text" value="0">
+                                                  <p>
+                                                  <label for="input-select">Direction</label>
+                                                  <select class="form-control form-control-default" id="dirVert">
+                                                      <option>+</option>
+                                                      <option>-</option>
+                                                  </select>
+                                            </div>
+                                            <div class="card-action">
+                                                <div class="card-action-btn pull-left">
+                                                    <a class="btn btn-flat waves-attach" href="javascript:Vert();stepMotor(this);void(0)" id="vertical"><span class="text-blue">Move!</span></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4">
+                                    <div class="card">
+                                        <div class="card-main">
+                                            <div class="card-inner">
+                                                <p class="card-heading">Pitch</p>
+                                                <p>Input even number of steps to move (1 step ~ 8.4e-5 degrees)</p>
+                                                <input class="form-control" id="stepsPitch" type="text" value="0">
+                                                    <p>
+                                                <label for="input-select">Direction</label>
+                                                <select class="form-control form-control-default" id="dirPitch">
+                                                      <option>+</option>
+                                                      <option>-</option>
+                                                  </select>
+                                            </div>
+                                            <div class="card-action">
+                                                <div class="card-action-btn pull-left">
+                                                    <a class="btn btn-flat waves-attach" href="javascript:Pitch();pitch2();void(0)"><span class="text-blue">Move!</span></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                              <div class="col-lg-4 col-sm-4">
+                                  <div class="card">
+                                      <div class="card-main">
+                                          <div class="card-inner">
+                                              <p class="card-heading">Roll</p>
+                                              <p>Input steps to move (1 step ~ 8.4e-5 degrees)</p>
+                                              <input class="form-control" id="stepsRoll" type="text" value="0">
+                                                  <p>
+                                                  <label for="input-select">Direction</label>
+                                                  <select class="form-control form-control-default" id="dirRoll">
+                                                      <option>+</option>
+                                                      <option>-</option>
+                                                  </select>
+                                                  </div>
+                                          <div class="card-action">
+                                              <div class="card-action-btn pull-left">
+                                                  <a class="btn btn-flat waves-attach" href="javascript:Roll();stepMotor(this);void(0)"><span class="text-blue">Move!</span></a>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                              
+                          </div>
+                      </div>
+                      
+                      <div class="card-wrap">
+                          <div class="row">
+                              <div class="col-lg-4 col-sm-4">
+                                  <div class="card">
+                                      
+                                      <div class="card-main">
+                                          <div class="card-inner">
+                                              <p class="card-heading">A only</p>
+                                              <p>Input steps to move (1 step ~ 1.02 microns)</p>
+                                              <input class="form-control" id="stepsA" type="text" value="0">
+                                                  <p>
+                                                  <label for="input-select">Direction</label>
+                                                  <select class="form-control form-control-default" id="dirA">
+                                                      <option>+</option>
+                                                      <option>-</option>
+                                                  </select>
+                                                  </div>
+                                          <div class="card-action">
+                                              <div class="card-action-btn pull-left">
+                                                  <a class="btn btn-flat waves-attach" href="javascript:A();stepMotor(this);void(0)"><span class="text-blue">Move!</span></a>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                    
+                              <div class="col-lg-4 col-sm-4">
+                                  <div class="card">
+                                      
+                                      <div class="card-main">
+                                          <div class="card-inner">
+                                              <p class="card-heading">B only</p>
+                                              <p>Input steps to move (1 step ~ 1.02 microns)</p>
+                                              <input class="form-control" id="stepsB" type="text" value="0">
+                                                  <p>
+                                                  <label for="input-select">Direction</label>
+                                                  <select class="form-control form-control-default" id="dirB">
+                                                      <option>+</option>
+                                                      <option>-</option>
+                                                  </select>
+                                                  </div>
+                                          <div class="card-action">
+                                              <div class="card-action-btn pull-left">
+                                                  <a class="btn btn-flat waves-attach" href="javascript:B();stepMotor(this);void(0)"><span class="text-blue">Move!</span></a>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                    
+                              <div class="col-lg-4 col-sm-4">
+                                  <div class="card">
+                                     
+                                      <div class="card-main">
+                                          <div class="card-inner">
+                                              <p class="card-heading">C only</p>
+                                              <p>Input steps to move (1 step ~ 1.02 microns)</p>
+                                              <input class="form-control" id="stepsC" type="text" value="0">
+                                                  <p>
+                                                  <label for="input-select">Direction</label>
+                                                  <select class="form-control form-control-default" id="dirC">
+                                                      <option>+</option>
+                                                      <option>-</option>
+                                                  </select>
+                                                  </div>
+                                          <div class="card-action">
+                                              <div class="card-action-btn pull-left">
+                                                  <a class="btn btn-flat waves-attach" href="javascript:C();stepMotor(this);void(0)"><span class="text-blue">Move!</span></a>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                </section>
+            </div>
+        </div>
+	</body>
+</html>
