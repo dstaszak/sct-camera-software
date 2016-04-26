@@ -51,7 +51,9 @@ void readLines(File fFile, int itemi) {
    String output = "";
     int line =0;
     char chr;
+    int charsread=0;
     while (line<3) {
+      charsread+=1;
       chr = (char)fFile.read();
       if(chr != 'L') output+=chr;
       else {
@@ -70,6 +72,9 @@ void readLines(File fFile, int itemi) {
         }
         output = "";
         line++;
+      }
+      if(charsread>100){
+        break;
       }
     }
     fFile.close();
@@ -104,6 +109,10 @@ void setInfo(int item[], String itm, YunClient client){
 }
 
 void range(YunClient client){
+  //Function to find the range of motion for each motor.
+  //this is design to be used with magnet switches, if switches are installed
+  //at both ends of each screw, then the steps to move can be set to 20,000
+  //otherwise leave the steps at <1000 so that we dont jam the camera into the ends.
   client.print("Moving motors to max +Z; ");
   stepMotor("A",500,"+",client);
   stepMotor("B",500,"+",client);
@@ -134,32 +143,35 @@ void range(YunClient client){
 void setup() {
   msgsSent=0;
   startupMsgs="";
+  //the above pertain to motion tracking files...see functions invovled with reading files
   Serial.begin(9600);
   // Bridge startup
-  pinMode(8, OUTPUT);
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(6, OUTPUT);
-  pinMode(A2,OUTPUT);
-  pinMode(A3,OUTPUT);
-  pinMode(A4,OUTPUT);
-  digitalWrite(A2,HIGH);
-  digitalWrite(A3,HIGH);
-  digitalWrite(A4,HIGH);
-  pinMode(3, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(3), rupt, RISING);
+  pinMode(8, OUTPUT);//a dir
+  pinMode(9, OUTPUT);//b dir
+  pinMode(10, OUTPUT);//c dir
+  pinMode(12, OUTPUT);//a pulse
+  pinMode(4, OUTPUT);//b pulse
+  pinMode(6, OUTPUT);//c pulse
+  pinMode(A2,OUTPUT);// a enable
+  pinMode(A3,OUTPUT);// c enable
+  pinMode(A4,OUTPUT);// b enable
+  digitalWrite(A2,HIGH);// disable a
+  digitalWrite(A3,HIGH);//disable c
+  digitalWrite(A4,HIGH);//disable b
+  pinMode(3, OUTPUT);// setup interruption pin
+  attachInterrupt(digitalPinToInterrupt(3), rupt, RISING);//magnetic switch interrupt setup
   Bridge.begin();
   server.listenOnLocalhost();
   server.begin();
   YunClient client = server.accept();
+  //try and get the saved position, range and alignment data
   getInfo("rng",client);
   getInfo("pos",client);
   getInfo("algn",client);
 }
 void rupt() {
   AINT = 1;
+  //step motor function wont move if this is 1.
 }
 
 void stepMotor(String Motor, long steps, String dir, YunClient client) {
@@ -168,11 +180,11 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
   int mot1;
   int mot2;
   int mot3;
-  static unsigned int pulsePort[] = { 0b10111111/*6*/, 0b11101111/*4*/, 0b01111111/*7*/ }; //PORTD Pins 12,4,6 (A,B,C)
-  static unsigned int dirPort[] = { 0b11101111/*4*/, 0b11011111/*5*/, 0b10111111/*6*/ }; //PORTB Pins 8,9,10 (A,B,C)
-  //cases A,B,C,ALL,AB,AC,BC
-  DDRD = 0b11111011;
-  DDRB = 0b11111111;
+  static unsigned int pulsePort[] = { 0b10111111/*6*/, 0b11101111/*4*/, 0b01111111/*7*/ }; //PORTD, Digital Pins 12,4,6 (A,B,C)
+  static unsigned int dirPort[] = { 0b11101111/*4*/, 0b11011111/*5*/, 0b10111111/*6*/ }; //PORTB, Digital Pins 8,9,10 (A,B,C)
+  //cases A,B,C,ALL,AB,AC,BC, CS= AB together, but opposite directions (for Pitch)
+  DDRD = 0b11111011;//setup port D for output
+  DDRB = 0b11111111;//setup port B for output
   int sgn =1;
   if (String(dir) == "-") { //DIR HIGH
     PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
@@ -388,9 +400,9 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
     else {
       client.print("None; ");
     }
-    digitalWrite(A2,HIGH);
-    digitalWrite(A3,HIGH);
-    digitalWrite(A4,HIGH);
+    digitalWrite(A2,HIGH);// disable a
+    digitalWrite(A3,HIGH);// disable c
+    digitalWrite(A4,HIGH);//disable b
     client.print("Saving Position</br>");
     setInfo(pos,"pos",client);
 }
@@ -460,6 +472,7 @@ void process(YunClient client) {
     else if(command[0].indexOf("findRng")>=0){
       range(client);
     }
+    //below is the testing loop
     else if(command[0].indexOf("cta")>=0){
       for(int gf =0; gf<150; gf++){
         client.print("loop: ");
