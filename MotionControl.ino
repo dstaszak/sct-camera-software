@@ -8,10 +8,13 @@ YunServer server;
 int pos[3];
 int rng[3];
 int algn[3];
+String startupMsgs;
+volatile int msgsSent;
 volatile int AINT = 0;
 volatile int stps = 0;
 
 void getInfo(String item, YunClient client){
+  //getting info from files for position tracking and control
   int itemi;
   int found =1;
   File fFile;
@@ -19,6 +22,7 @@ void getInfo(String item, YunClient client){
   itemi=1;
    if(FileSystem.exists("/mnt/sda1/position.txt")) readLines(FileSystem.open("/mnt/sda1/position.txt"),itemi);
    else {
+    startupMsgs+=item+" file not found. Please initialize manually before continuing</br>";
     client.print(item+" file not found</br>");
     found=0;
    }
@@ -27,6 +31,7 @@ void getInfo(String item, YunClient client){
   itemi=2;
    if(FileSystem.exists("/mnt/sda1/range.txt")) readLines(FileSystem.open("/mnt/sda1/range.txt"),itemi);
    else {
+    startupMsgs+=item+" file not found. Please initialize manually before continuing</br>";
     client.print(item+" file not found</br>");
     found=0;
    }
@@ -35,12 +40,14 @@ void getInfo(String item, YunClient client){
   itemi=3;
    if(FileSystem.exists("/mnt/sda1/alignment.txt")) readLines(FileSystem.open("/mnt/sda1/alignment.txt"),itemi);
    else {
+    startupMsgs+=item+" file not found. Please initialize manually before continuing</br>";
     client.print(item+" file not found</br>");
     found=0;
    }
  }
 }
 void readLines(File fFile, int itemi) {
+  //read the first line in the file. Delimiter is L
    String output = "";
     int line =0;
     char chr;
@@ -49,6 +56,7 @@ void readLines(File fFile, int itemi) {
       if(chr != 'L') output+=chr;
       else {
         output.trim();
+        //read text file into the appropriate program variable
         switch(itemi){
           case 1:
             pos[line]=output.toInt();
@@ -67,6 +75,7 @@ void readLines(File fFile, int itemi) {
     fFile.close();
 }
 void setInfo(int item[], String itm, YunClient client){
+  //Prep data for writing, then delete previous file if it exists and then write new file
   String info ="";
   info +=String(item[0]);
   info +='L';
@@ -123,6 +132,8 @@ void range(YunClient client){
 }
 
 void setup() {
+  msgsSent=0;
+  startupMsgs="";
   Serial.begin(9600);
   // Bridge startup
   pinMode(8, OUTPUT);
@@ -385,106 +396,113 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
 }
 
 void process(YunClient client) {
-  String command[3];
-  String commands;
-  commands = client.readStringUntil('/');
-  commands.trim();
-  command[0] = commands;
-  commands = client.readStringUntil('/');
-  commands.trim();
-  command[1] = commands;
-  commands = client.readStringUntil('/');
-  commands.trim();
-  command[2] = commands;
-  client.print("Commands recieved: ");
- // client.print("Dir ");
-  client.print(command[0]);
-  client.print(" :");
- // client.print("Steps ");
-  client.print(command[1]);
-  client.print(" :");
-  //client.print("Motors ");
-  client.print(command[2]);
-  client.print("</br>");
-  //commands[0,1,2] = Dir, Steps, Motor
-  if(command[0].indexOf("interruptions")>=0){
-    client.print(AINT);
-  }
-  else if(command[0].indexOf("getPos")>=0){
-    getInfo("pos",client);
-    client.print("Position: A-");
-    client.print(String(pos[0]));
-    client.print("  B-");
-    client.print(String(pos[1]));
-    client.print("  C-");
-    client.print(String(pos[2]));
+  if(msgsSent){
+    String command[3];
+    String commands;
+    commands = client.readStringUntil('/');
+    commands.trim();
+    command[0] = commands;
+    commands = client.readStringUntil('/');
+    commands.trim();
+    command[1] = commands;
+    commands = client.readStringUntil('/');
+    commands.trim();
+    command[2] = commands;
+    client.print("Commands recieved: ");
+   // client.print("Dir ");
+    client.print(command[0]);
+    client.print(" :");
+   // client.print("Steps ");
+    client.print(command[1]);
+    client.print(" :");
+    //client.print("Motors ");
+    client.print(command[2]);
     client.print("</br>");
-  }
-  else if(command[0].indexOf("setAlgn")>=0){
-    setInfo(pos,"algn",client);
-  }
-  else if(command[0].indexOf("setRng")>=0){
-    setInfo(pos,"rng",client);
-  }
-  else if(command[0].indexOf("getAlgn")>=0){
-    client.print("Alignment: A-");
-    client.print(String(algn[0]));
-    client.print("  B-");
-    client.print(String(algn[1]));
-    client.print("  C-");
-    client.print(String(algn[2]));
-    client.print("</br>");
-  }
-  else if(command[0].indexOf("getRng")>=0){
-    getInfo("rng",client);
-    client.print("Range: A-");
-    client.print(String(rng[0]));
-    client.print("  B-");
-    client.print(String(rng[1]));
-    client.print("  C-");
-    client.print(String(rng[2]));
-    client.print("</br>");
-  }
-  else if(command[0].indexOf("findRng")>=0){
-    range(client);
-  }
-  else if(command[0].indexOf("cta")>=0){
-    for(int gf =0; gf<59; gf++){
-      client.print("loop: ");
-      client.println(gf);
-    stepMotor(String("All"), long(5000), String("+"), client);
-    stepMotor(String("All"), long(10000), String("-"), client);
-    stepMotor(String("All"), long(10000), String("+"), client);
-    stepMotor(String("All"), long(5000), String("-"), client);
-    
-    stepMotor(String("CS"), long(10000), String("+"), client);
-    stepMotor(String("CS"), long(20000), String("-"), client);
-    stepMotor(String("CS"), long(20000), String("+"), client);
-    stepMotor(String("CS"), long(10000), String("-"), client);
-    
-    stepMotor(String("AB"), long(5000), String("+"), client);
-    stepMotor(String("AB"), long(10000), String("-"), client);
-    stepMotor(String("AB"), long(10000), String("+"), client);
-    stepMotor(String("AB"), long(5000), String("-"), client);
-    
-    stepMotor(String("A"), long(5000), String("+"), client);
-    stepMotor(String("A"), long(10000), String("-"), client);
-    stepMotor(String("A"), long(10000), String("+"), client);
-    stepMotor(String("A"), long(5000), String("-"), client);
-
-    stepMotor(String("B"), long(5000), String("+"), client);
-    stepMotor(String("B"), long(10000), String("-"), client);
-    stepMotor(String("B"), long(10000), String("+"), client);
-    stepMotor(String("B"), long(5000), String("-"), client);
-
-    stepMotor(String("C"), long(5000), String("+"), client);
-    stepMotor(String("C"), long(10000), String("-"), client);
-    stepMotor(String("C"), long(10000), String("+"), client);
-    stepMotor(String("C"), long(5000), String("-"), client);
+    //commands[0,1,2] = Dir, Steps, Motor
+    if(command[0].indexOf("interruptions")>=0){
+      client.print(AINT);
+    }
+    else if(command[0].indexOf("getPos")>=0){
+      getInfo("pos",client);
+      client.print("Position: A-");
+      client.print(String(pos[0]));
+      client.print("  B-");
+      client.print(String(pos[1]));
+      client.print("  C-");
+      client.print(String(pos[2]));
+      client.print("</br>");
+    }
+    else if(command[0].indexOf("setAlgn")>=0){
+      setInfo(pos,"algn",client);
+    }
+    else if(command[0].indexOf("setRng")>=0){
+      setInfo(pos,"rng",client);
+    }
+    else if(command[0].indexOf("getAlgn")>=0){
+      client.print("Alignment: A-");
+      client.print(String(algn[0]));
+      client.print("  B-");
+      client.print(String(algn[1]));
+      client.print("  C-");
+      client.print(String(algn[2]));
+      client.print("</br>");
+    }
+    else if(command[0].indexOf("getRng")>=0){
+      getInfo("rng",client);
+      client.print("Range: A-");
+      client.print(String(rng[0]));
+      client.print("  B-");
+      client.print(String(rng[1]));
+      client.print("  C-");
+      client.print(String(rng[2]));
+      client.print("</br>");
+    }
+    else if(command[0].indexOf("findRng")>=0){
+      range(client);
+    }
+    else if(command[0].indexOf("cta")>=0){
+      for(int gf =0; gf<150; gf++){
+        client.print("loop: ");
+        client.println(gf);
+      /*stepMotor(String("All"), long(5000), String("+"), client);
+      stepMotor(String("All"), long(10000), String("-"), client);
+      stepMotor(String("All"), long(10000), String("+"), client);
+      stepMotor(String("All"), long(5000), String("-"), client);
+      
+      stepMotor(String("CS"), long(10000), String("+"), client);
+      stepMotor(String("CS"), long(20000), String("-"), client);
+      stepMotor(String("CS"), long(20000), String("+"), client);
+      stepMotor(String("CS"), long(10000), String("-"), client);
+      
+      stepMotor(String("AB"), long(5000), String("+"), client);
+      stepMotor(String("AB"), long(10000), String("-"), client);
+      stepMotor(String("AB"), long(10000), String("+"), client);
+      stepMotor(String("AB"), long(5000), String("-"), client);
+      
+      stepMotor(String("A"), long(5000), String("+"), client);
+      stepMotor(String("A"), long(10000), String("-"), client);
+      stepMotor(String("A"), long(10000), String("+"), client);
+      stepMotor(String("A"), long(5000), String("-"), client);
+  
+      stepMotor(String("B"), long(5000), String("+"), client);
+      stepMotor(String("B"), long(10000), String("-"), client);
+      stepMotor(String("B"), long(10000), String("+"), client);
+      stepMotor(String("B"), long(5000), String("-"), client);
+  */
+      stepMotor(String("C"), long(5000), String("+"), client);
+      stepMotor(String("C"), long(10000), String("-"), client);
+      stepMotor(String("C"), long(10000), String("+"), client);
+      stepMotor(String("C"), long(5000), String("-"), client);
+      }
+    }
+    else {
+      stepMotor( command[2], long(command[1].toFloat()), command[0], client );
     }
   }
   else {
-    stepMotor( command[2], long(command[1].toFloat()), command[0], client );
+    client.print("If needed please complete startup manually. See below </br>");
+    client.print(startupMsgs);
+    msgsSent=1;
   }
 }
 
