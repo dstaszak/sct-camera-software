@@ -14,6 +14,7 @@ volatile int AINT = 0;
 volatile int stps = 0;
 
 void getInfo(String item, YunClient client){
+  //getting info from files for position tracking and control
   int itemi;
   int found =1;
   File fFile;
@@ -46,6 +47,7 @@ void getInfo(String item, YunClient client){
  }
 }
 void readLines(File fFile, int itemi) {
+  //read the first line in the file. Delimiter is L
    String output = "";
     int line =0;
     char chr;
@@ -54,6 +56,7 @@ void readLines(File fFile, int itemi) {
       if(chr != 'L') output+=chr;
       else {
         output.trim();
+        //read text file into the appropriate program variable
         switch(itemi){
           case 1:
             pos[line]=output.toInt();
@@ -72,6 +75,7 @@ void readLines(File fFile, int itemi) {
     fFile.close();
 }
 void setInfo(int item[], String itm, YunClient client){
+  //Prep data for writing, then delete previous file if it exists and then write new file
   String info ="";
   info +=String(item[0]);
   info +='L';
@@ -457,7 +461,7 @@ void process(YunClient client) {
       range(client);
     }
     else if(command[0].indexOf("cta")>=0){
-      for(int gf =0; gf<59; gf++){
+      for(int gf =0; gf<150; gf++){
         client.print("loop: ");
         client.println(gf);
       /*stepMotor(String("All"), long(5000), String("+"), client);
@@ -496,8 +500,9 @@ void process(YunClient client) {
     }
   }
   else {
-    client.print("If needed please complete startup manually. See below <\br>");
+    client.print("If needed please complete startup manually. See below </br>");
     client.print(startupMsgs);
+    msgsSent=1;
   }
 }
 
