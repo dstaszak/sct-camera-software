@@ -114,17 +114,22 @@ void range(YunClient client){
   //at both ends of each screw, then the steps to move can be set to 20,000
   //otherwise leave the steps at <1000 so that we dont jam the camera into the ends.
   client.print("Moving motors to max +Z; ");
-  stepMotor("A",500,"+",client);
-  stepMotor("B",500,"+",client);
-  stepMotor("C",500,"+",client);
-  client.print("Finding Motor A range; ");
+  rng[0]=31000;
+  rng[1]=31000;
+  rng[2]=31000;
+  pos[0]=pos[1]=pos[2]=30000;
   stepMotor("A",500,"-",client);
+  stepMotor("B",500,"-",client);
+  stepMotor("C",500,"-",client);
+  pos[0]=pos[1]=pos[2]=0;
+  client.print("Finding Motor A range; ");
+  stepMotor("A",500,"+",client);
   pos[0]=stps;
   client.print("Finding Motor B range; ");
-  stepMotor("B",500,"-",client);
+  stepMotor("B",500,"+",client);
   pos[1]=stps;
   client.print("Finding Motor C range; ");
-  stepMotor("C",500,"-",client);
+  stepMotor("C",500,"+",client);
   pos[2]=stps;
   String rng ="";
   rng +=pos[0];
