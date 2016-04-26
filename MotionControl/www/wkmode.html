@@ -32,14 +32,14 @@
         dir = document.getElementById('dirRoll').value;
         //if +, ab up
         //if -, ab down
-        //measure distance from balljoint on a to ball joint on c and distance from b to c the trig to find media length (hypotenuse) and distance moved is the side length
         motors = 'AB';
         steps = (parseInt(document.getElementById('stepsRoll').value)*angleFactorRoll).toString();
     }
     function Pitch( ) {
         dir = document.getElementById('dirPitch').value;
-        //measure from ball joint a to ball joint b is hypotenuse and distance moved is angle
         steps = parseInt(document.getElementById('stepsPitch').value);
+        //if + A+, B-
+        //if - A-, B+
         if((steps%2)==1){
             steps+=1;
         }
@@ -128,8 +128,9 @@
 			<div class="content-heading">
 				<div class="container">
 					<div class="row">
-						<div class="col-lg-6 col-lg-push-3 col-sm-10 col-sm-push-1">
+						<div class="col-lg-6  col-sm-10 ">
 							<h1 class="alarge" onClick="location.href='index.html'">pSCT Motion Control</h1>
+                            <img src="camerapic.pdf" style="width:50%">
 						</div>
                     </div>
 				</div>
