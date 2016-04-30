@@ -170,9 +170,6 @@ void setup() {
   server.begin();
   YunClient client = server.accept();
   //try and get the saved position, range and alignment data
-  getInfo("rng",client);
-  getInfo("pos",client);
-  getInfo("algn",client);
 }
 void rupt() {
   AINT = 1;
@@ -479,7 +476,7 @@ void process(YunClient client) {
     }
     //below is the testing loop
     else if(command[0].indexOf("cta")>=0){
-      for(int gf =0; gf<150; gf++){
+      for(int gf =0; gf<50; gf++){
         client.print("loop: ");
         client.println(gf);
       /*stepMotor(String("All"), long(5000), String("+"), client);
@@ -518,7 +515,10 @@ void process(YunClient client) {
     }
   }
   else {
-    client.print("If needed please complete startup manually. See below </br>");
+     getInfo("rng",client);
+     getInfo("pos",client);
+     getInfo("algn",client);
+     client.print("If needed please complete startup manually. See below </br>");
     client.print(startupMsgs);
     msgsSent=1;
   }
