@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta content="IE=edge" http-equiv="X-UA-Compatible">
 	<meta content="initial-scale=1.0, width=device-width" name="viewport">
-	<title>CTA pSCT MC Wakeley Mode</title>
+	<title>CTA pSCT MC Alignment Mode</title>
 
 	<!-- css -->
 	<link href="css/base.min.css" rel="stylesheet">
@@ -32,23 +32,14 @@
         dir = document.getElementById('dirRoll').value;
         //if +, ab up
         //if -, ab down
-        //measure distance from balljoint on a to ball joint on c and distance from b to c the trig to find media length (hypotenuse) and distance moved is the side length
         motors = 'AB';
         steps = (parseInt(document.getElementById('stepsRoll').value)*angleFactorRoll).toString();
     }
     function Pitch( ) {
         dir = document.getElementById('dirPitch').value;
-        //if +, a up
-        //if -, b up
-        //measure from ball joint a to ball joint b is hypotenuse and distance moved is angle
-        if(dir =='+'){
-            motors = 'A';
-        };
-        if(dir =='-'){
-            motors = 'B';
-            dir = '+';
-        };
         steps = parseInt(document.getElementById('stepsPitch').value);
+        //if + A+, B-
+        //if - A-, B+
         if((steps%2)==1){
             steps+=1;
         }
@@ -64,14 +55,14 @@
         motors = 'B';
         dir = document.getElementById('dirB').value;
         steps = (parseInt(document.getElementById('stepsB').value)*verticalFactor).toString();
-        $.get('/arduino/getPos',getPosition);
-        $.get('/arduino/getRng',getRange);
+      //  $.get('/arduino/getPos',getPosition);
+       // $.get('/arduino/getRng',getRange);
         
     }
-    function getPosition(data){
+    /*function getPosition(data){
         aint=data;
         alert(aint);
-    }
+    }*/
     function getRange(data){
         aint=data;
         alert(aint);
@@ -85,9 +76,13 @@
         document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
         $('#info').load((('/arduino/'.concat(dir.concat('/'))).concat(steps.concat('/'))).concat(motors),function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
     }
+    function CTA( ) {
+        document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
+        $('#info').load('/arduino/cta',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
     function pitch2( ) {
         document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
-        $('#info').load((('/arduino/'.concat('-'.concat('/'))).concat(steps).concat('/')).concat('CS'),function(){status = String(document.getElementById('info').innerHTML);stepMotor()});
+        $('#info').load((('/arduino/'.concat(dir.concat('/'))).concat(steps).concat('/')).concat('CS'),function(){status = String(document.getElementById('info').innerHTML)});
         
     }
     function interrupted() {
@@ -97,12 +92,16 @@
     }
     function range() {
         document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
-        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Ranging: ");
-        $('#info').load('/arduino/setRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Finding Range: ");
+        $('#info').load('/arduino/findRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
     }
     function getRng() {
         document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Getting Range: ");
         $('#info').load('/arduino/getRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+    }
+    function setRng() {
+        document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Setting Range: ");
+        $('#info').load('/arduino/setRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
     }
     function getPos() {
         document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Getting Position: ");
@@ -129,8 +128,9 @@
 			<div class="content-heading">
 				<div class="container">
 					<div class="row">
-						<div class="col-lg-6 col-lg-push-3 col-sm-10 col-sm-push-1">
+						<div class="col-lg-6  col-sm-10 ">
 							<h1 class="alarge" onClick="location.href='index.html'">pSCT Motion Control</h1>
+                            <img src="camerapic.pdf" style="width:50%">
 						</div>
                     </div>
 				</div>
@@ -153,10 +153,13 @@
                                               <a class="btn btn-flat waves-attach" href="javascript:clearStatus()" id="vertical"><span class="text-blue">Clear</span></a>
                                           </div>
                                           <div class="card-action-btn pull-left">
-                                              <a class="btn btn-flat waves-attach" href="javascript:range()" id="vertical"><span class="text-blue">Range</span></a>
+                                              <a class="btn btn-flat waves-attach" href="javascript:range()" id="vertical"><span class="text-blue">Find Range</span></a>
                                           </div>
                                           <div class="card-action-btn pull-left">
                                               <a class="btn btn-flat waves-attach" href="javascript:getRng()" id="vertical"><span class="text-blue">getRng</span></a>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:setRng()" id="vertical"><span class="text-blue">setRng</span></a>
                                           </div>
                                           <div class="card-action-btn pull-left">
                                               <a class="btn btn-flat waves-attach" href="javascript:getPos()" id="vertical"><span class="text-blue">getPos</span></a>
@@ -166,6 +169,9 @@
                                           </div>
                                           <div class="card-action-btn pull-left">
                                               <a class="btn btn-flat waves-attach" href="javascript:setAlgn()" id="vertical"><span class="text-blue">setAlgn</span></a>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:CTA()" id="vertical"><span class="text-blue">CTA</span></a>
                                           </div>
                                       </div>
                                   </div>

@@ -32,23 +32,14 @@
                                 dir = document.getElementById('dirRoll').value;
                                 //if +, ab up
                                 //if -, ab down
-                                //measure distance from balljoint on a to ball joint on c and distance from b to c the trig to find media length (hypotenuse) and distance moved is the side length
                                 motors = 'AB';
                                 steps = (parseInt(document.getElementById('stepsRoll').value)*angleFactorRoll).toString();
                             }
                             function Pitch( ) {
                                 dir = document.getElementById('dirPitch').value;
-                                //if +, a up
-                                //if -, b up
-                                //measure from ball joint a to ball joint b is hypotenuse and distance moved is angle
-                                if(dir =='+'){
-                                    motors = 'A';
-                                };
-                                if(dir =='-'){
-                                    motors = 'B';
-                                    dir = '+';
-                                };
                                 steps = parseInt(document.getElementById('stepsPitch').value);
+                                //if + A+, B-
+                                //if - A-, B+
                                 if((steps%2)==1){
                                     steps+=1;
                                 }
@@ -59,10 +50,22 @@
                                 dir = document.getElementById('dirA').value;
                                 steps = (parseInt(document.getElementById('stepsA').value)*verticalFactor).toString();
                             }
+                            var aint;
                             function B( ) {
                                 motors = 'B';
                                 dir = document.getElementById('dirB').value;
                                 steps = (parseInt(document.getElementById('stepsB').value)*verticalFactor).toString();
+                                //  $.get('/arduino/getPos',getPosition);
+                                // $.get('/arduino/getRng',getRange);
+                                
+                            }
+                            /*function getPosition(data){
+                             aint=data;
+                             alert(aint);
+                             }*/
+                            function getRange(data){
+                                aint=data;
+                                alert(aint);
                             }
                             function C( ) {
                                 motors = 'C';
@@ -71,21 +74,67 @@
                             }
                             function stepMotor( ) {
                                 document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
-                                $('#info').load((('/arduino/'.concat(dir.concat('/'))).concat(steps.concat('/'))).concat(motors),function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML);logData()});
+                                $('#info').load((('/arduino/'.concat(dir.concat('/'))).concat(steps.concat('/'))).concat(motors),function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+                            }
+                            function CTA( ) {
+                                document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
+                                $('#info').load('/arduino/cta',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
                             }
                             function pitch2( ) {
                                 document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
-                                $('#info').load((('/arduino/'.concat('-'.concat('/'))).concat(steps).concat('/')).concat('CS'),function(){status = String(document.getElementById('info').innerHTML);stepMotor()});
+                                $('#info').load((('/arduino/'.concat(dir.concat('/'))).concat(steps).concat('/')).concat('CS'),function(){status = String(document.getElementById('info').innerHTML)});
                                 
                             }
                             function interrupted() {
                                 document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
                                 document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Interuptions: ");
-                                $('#info').load('/arduino/interruptions');
+                                $('#info').load('/arduino/interruptions',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
                             }
+                            function range() {
+                                document.getElementById('info').innerHTML =String(document.getElementById('info').innerHTML).concat("</br>Waiting for Arduino...");
+                                document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Finding Range: ");
+                                $('#info').load('/arduino/findRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+                            }
+                            function getRng() {
+                                document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Getting Range: ");
+                                $('#info').load('/arduino/getRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+                            }
+                            function setRng() {
+                                document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Setting Range: ");
+                                $('#info').load('/arduino/setRng',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+                            }
+                            function getPos() {
+                                document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Getting Position: ");
+                                $('#info').load('/arduino/getPos',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+                            }
+                            function getAlgn() {
+                                document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Getting Alignment: ");
+                                $('#info').load('/arduino/getAlgn',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+                            }
+                            function setAlgn() {
+                                document.getElementById('info').innerHTML = String(document.getElementById('info').innerHTML).concat("</br>Setting Alignment: ");
+                                $('#info').load('/arduino/setAlgn',function(){document.getElementById('info').innerHTML = status.concat(String(document.getElementById('info').innerHTML));status = String(document.getElementById('info').innerHTML)});
+                            }
+                            
                             function clearStatus() {
                                 status = "";
                                 document.getElementById('info').innerHTML = status;
+                            }
+                            
+                            function pass(){
+                                var password;
+                            
+                                var pass1="cta";
+                                
+                                password=prompt('Please enter your password to view this page!',' ');
+                                
+                                if (password==pass1){
+                                    window.location.href='wkmode.html'
+                                }
+                                else
+                                {
+                                    alert("incorrect password");
+                                }
                             }
                             </script>
                             </head>
@@ -96,9 +145,10 @@
                     <div class="row">
                         <div class="col-lg-6 col-lg-push-3 col-sm-10 col-sm-push-1">
                             <h1 class="alarge" onClick="location.href='index.html'">pSCT Motion Control</h1>
+                            <img src="camerapic.pdf" style="width:50%">
                         </div>
                         <div class="col-lg-6 col-lg-push-3 col-sm-10 col-sm-push-1">
-                            <p class="margin-top-no" onClick="location.href='wkmode.html'"><a class="btn btn-red waves-attach waves-button waves-light">Wakely Mode</a></p>
+                            <p class="margin-top-no" onClick="javascript:pass();"><a class="btn btn-red waves-attach waves-button waves-light">Alignment Mode</a></p>
                         </div>
                     </div>
                     
@@ -124,6 +174,16 @@
                                         <div class="card-action-btn pull-left">
                                             <a class="btn btn-flat waves-attach" href="javascript:clearStatus()" id="vertical"><span class="text-blue">Clear</span></a>
                                         </div>
+                                        <div class="card-action-btn pull-left">
+                                            <a class="btn btn-flat waves-attach" href="javascript:getRng()" id="vertical"><span class="text-blue">getRng</span></a>
+                                        </div>
+                                        <div class="card-action-btn pull-left">
+                                            <a class="btn btn-flat waves-attach" href="javascript:getPos()" id="vertical"><span class="text-blue">getPos</span></a>
+                                        </div>
+                                        <div class="card-action-btn pull-left">
+                                            <a class="btn btn-flat waves-attach" href="javascript:getAlgn()" id="vertical"><span class="text-blue">getAlgn</span></a>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
