@@ -55,14 +55,7 @@
         motors = 'B';
         dir = document.getElementById('dirB').value;
         steps = (parseInt(document.getElementById('stepsB').value)*verticalFactor).toString();
-      //  $.get('/arduino/getPos',getPosition);
-       // $.get('/arduino/getRng',getRange);
-        
     }
-    /*function getPosition(data){
-        aint=data;
-        alert(aint);
-    }*/
     function getRange(data){
         aint=data;
         alert(aint);
@@ -153,13 +146,7 @@
                                               <a class="btn btn-flat waves-attach" href="javascript:clearStatus()" id="vertical"><span class="text-blue">Clear</span></a>
                                           </div>
                                           <div class="card-action-btn pull-left">
-                                              <a class="btn btn-flat waves-attach" href="javascript:range()" id="vertical"><span class="text-blue">Find Range</span></a>
-                                          </div>
-                                          <div class="card-action-btn pull-left">
                                               <a class="btn btn-flat waves-attach" href="javascript:getRng()" id="vertical"><span class="text-blue">getRng</span></a>
-                                          </div>
-                                          <div class="card-action-btn pull-left">
-                                              <a class="btn btn-flat waves-attach" href="javascript:setRng()" id="vertical"><span class="text-blue">setRng</span></a>
                                           </div>
                                           <div class="card-action-btn pull-left">
                                               <a class="btn btn-flat waves-attach" href="javascript:getPos()" id="vertical"><span class="text-blue">getPos</span></a>
@@ -169,6 +156,9 @@
                                           </div>
                                           <div class="card-action-btn pull-left">
                                               <a class="btn btn-flat waves-attach" href="javascript:setAlgn()" id="vertical"><span class="text-blue">setAlgn</span></a>
+                                          </div>
+                                          <div class="card-action-btn pull-left">
+                                              <a class="btn btn-flat waves-attach" href="javascript:setRng()" id="vertical"><span class="text-blue">setRng</span></a>
                                           </div>
                                           <div class="card-action-btn pull-left">
                                               <a class="btn btn-flat waves-attach" href="javascript:CTA()" id="vertical"><span class="text-blue">CTA</span></a>

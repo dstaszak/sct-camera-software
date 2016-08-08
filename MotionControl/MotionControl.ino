@@ -108,42 +108,6 @@ void setInfo(int item[], String itm, YunClient client){
  }
 }
 
-void range(YunClient client){
-  //Function to find the range of motion for each motor.
-  //this is design to be used with magnet switches, if switches are installed
-  //at both ends of each screw, then the steps to move can be set to 20,000
-  //otherwise leave the steps at <1000 so that we dont jam the camera into the ends.
-  client.print("Moving motors to max +Z; ");
-  rng[0]=31000;
-  rng[1]=31000;
-  rng[2]=31000;
-  pos[0]=pos[1]=pos[2]=30000;
-  stepMotor("A",500,"-",client);
-  stepMotor("B",500,"-",client);
-  stepMotor("C",500,"-",client);
-  pos[0]=pos[1]=pos[2]=0;
-  client.print("Finding Motor A range; ");
-  stepMotor("A",500,"+",client);
-  pos[0]=stps;
-  client.print("Finding Motor B range; ");
-  stepMotor("B",500,"+",client);
-  pos[1]=stps;
-  client.print("Finding Motor C range; ");
-  stepMotor("C",500,"+",client);
-  pos[2]=stps;
-  String rng ="";
-  rng +=pos[0];
-  rng +='L';
-  rng +=pos[1];
-  rng +='L';
-  rng +=pos[2];
-  rng +='L';
-  if(FileSystem.exists("mnt/sda1/range.txt")) FileSystem.remove("/mnt/sda1/range.txt");
-  File fFile = FileSystem.open("/mnt/sda1/range.txt",FILE_WRITE);
-  setInfo(pos,"pos",client);
-  fFile.print(rng);
-  fFile.close();
-}
 
 void setup() {
   msgsSent=0;
@@ -470,9 +434,6 @@ void process(YunClient client) {
       client.print("  C-");
       client.print(String(rng[2]));
       client.print("</br>");
-    }
-    else if(command[0].indexOf("findRng")>=0){
-      range(client);
     }
     //below is the testing loop
     else if(command[0].indexOf("cta")>=0){
