@@ -115,20 +115,20 @@ void setup() {
   //the above pertain to motion tracking files...see functions invovled with reading files
   Serial.begin(9600);
   // Bridge startup
-  pinMode(8, OUTPUT);//a dir
-  pinMode(9, OUTPUT);//b dir
-  pinMode(10, OUTPUT);//c dir
-  pinMode(12, OUTPUT);//a pulse
-  pinMode(4, OUTPUT);//b pulse
-  pinMode(6, OUTPUT);//c pulse
-  pinMode(A2,OUTPUT);// a enable
-  pinMode(A3,OUTPUT);// c enable
-  pinMode(A4,OUTPUT);// b enable
-  digitalWrite(A2,HIGH);// disable a
-  digitalWrite(A3,HIGH);//disable c
-  digitalWrite(A4,HIGH);//disable b
+  pinMode(8, OUTPUT);//c dir
+  pinMode(9, OUTPUT);//a dir
+  pinMode(10, OUTPUT);//b dir
+  pinMode(12, OUTPUT);//c pulse
+  pinMode(4, OUTPUT);//a pulse
+  pinMode(6, OUTPUT);//b pulse
+  pinMode(A2,OUTPUT);// c enable
+  pinMode(A3,OUTPUT);// b enable
+  pinMode(A4,OUTPUT);// a enable
+  digitalWrite(A2,HIGH);// disable c
+  digitalWrite(A3,HIGH);// disable b
+  digitalWrite(A4,HIGH);// disable a
   pinMode(3, OUTPUT);// setup interruption pin
-  attachInterrupt(digitalPinToInterrupt(3), rupt, RISING);//magnetic switch interrupt setup
+  attachInterrupt(digitalPinToInterrupt(3), rupt, RISING);//magnetic switch interrupt setup --- no switch, keeping this framework in case we want to do something later
   Bridge.begin();
   server.listenOnLocalhost();
   server.begin();
@@ -146,8 +146,8 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
   int mot1;
   int mot2;
   int mot3;
-  static unsigned int pulsePort[] = { 0b10111111/*6*/, 0b11101111/*4*/, 0b01111111/*7*/ }; //PORTD, Digital Pins 12,4,6 (A,B,C)
-  static unsigned int dirPort[] = { 0b11101111/*4*/, 0b11011111/*5*/, 0b10111111/*6*/ }; //PORTB, Digital Pins 8,9,10 (A,B,C)
+  static unsigned int pulsePort[] = { 0b10111111/*6*/, 0b11101111/*4*/, 0b01111111/*7*/ }; //PORTD, Digital Pins 12,4,6 (C,A,B)
+  static unsigned int dirPort[] = { 0b11101111/*4*/, 0b11011111/*5*/, 0b10111111/*6*/ }; //PORTB, Digital Pins 8,9,10 (C,A,B)
   //cases A,B,C,ALL,AB,AC,BC, CS= AB together, but opposite directions (for Pitch)
   DDRD = 0b11111011;//setup port D for output
   DDRB = 0b11111111;//setup port B for output
@@ -194,13 +194,13 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
-      digitalWrite(A3,LOW);
+      digitalWrite(A4,LOW);
       for (int i = 0; i < steps; i++) {
         if(AINT==0){
-          PORTD = PORTD & pulsePort[2];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[2]);//Pulse HIGH
+          PORTD = PORTD & pulsePort[1];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[2];//Pulse LOW
+          PORTD = PORTD & pulsePort[1];//Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[0]+=sgn;
@@ -214,13 +214,13 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
-      digitalWrite(A2,LOW);
+      digitalWrite(A3,LOW);
       for (int i = 0; i < steps; i++) {
        if(AINT==0){
-          PORTD = PORTD & pulsePort[0];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
+          PORTD = PORTD & pulsePort[2];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[2]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          PORTD = PORTD & pulsePort[2];//Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[1]+=sgn;
@@ -234,13 +234,13 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
-      digitalWrite(A4,LOW);
+      digitalWrite(A2,LOW);
       for (int i = 0; i < steps; i++) {
         if(AINT==0){
-          PORTD = PORTD & pulsePort[1];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
+          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[1];//Pulse LOW
+          PORTD = PORTD & pulsePort[0];//Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[2]+=sgn;
@@ -255,14 +255,14 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
-      digitalWrite(A2,LOW);
       digitalWrite(A3,LOW);
+      digitalWrite(A4,LOW);
       for (int i = 0; i < steps; i++) {
         if(AINT==0){
-          PORTD = PORTD & pulsePort[2] & pulsePort[0]; //Pulse LOW
-          PORTD = PORTD | ~(pulsePort[2] & pulsePort[0]); //Pulse HIGH
+          PORTD = PORTD & pulsePort[1] & pulsePort[2]; //Pulse LOW
+          PORTD = PORTD | ~(pulsePort[1] & pulsePort[2]); //Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[2] & pulsePort[0]; //Pulse LOW
+          PORTD = PORTD & pulsePort[1] & pulsePort[2]; //Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[0]+=sgn;
@@ -279,13 +279,13 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
     }
     else{
       digitalWrite(A2,LOW);
-      digitalWrite(A4,LOW);
+      digitalWrite(A3,LOW);
       for (int i = 0; i < steps; i++) {
         if(AINT==0){
-          PORTD = PORTD & pulsePort[0] & pulsePort[1]; //Pulse LOW
-          PORTD = PORTD | ~(pulsePort[0] & pulsePort[1]); //Pulse HIGH
+          PORTD = PORTD & pulsePort[0] & pulsePort[2]; //Pulse LOW
+          PORTD = PORTD | ~(pulsePort[0] & pulsePort[2]); //Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[0] & pulsePort[1]; //Pulse LOW
+          PORTD = PORTD & pulsePort[0] & pulsePort[2]; //Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[1]+=sgn;
@@ -301,14 +301,14 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
-      digitalWrite(A3,LOW);
+      digitalWrite(A2,LOW);
       digitalWrite(A4,LOW);
       for (int i = 0; i < steps; i++) {
         if(AINT==0){
-          PORTD = PORTD & pulsePort[2] & pulsePort[1]; //Pulse LOW
-          PORTD = PORTD | ~(pulsePort[2] & pulsePort[1]); //Pulse HIGH
+          PORTD = PORTD & pulsePort[0] & pulsePort[1]; //Pulse LOW
+          PORTD = PORTD | ~(pulsePort[0] & pulsePort[1]); //Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[2] & pulsePort[1]; //Pulse LOW
+          PORTD = PORTD & pulsePort[0] & pulsePort[1]; //Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[0]+=sgn;
@@ -324,14 +324,14 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
-      digitalWrite(A2,LOW);
       digitalWrite(A3,LOW);
+      digitalWrite(A4,LOW);
       for (int i = 0; i < steps/2; i++) {
         if(AINT==0){
-          PORTD = PORTD & pulsePort[2];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[2]);//Pulse HIGH
+          PORTD = PORTD & pulsePort[1];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[2];//Pulse LOW
+          PORTD = PORTD & pulsePort[1];//Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           if (String(dir) == "+") { //DIR HIGH
             PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
@@ -339,10 +339,10 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           if (String(dir) == "-") { //DIR LOW
             PORTB &= dirPort[0] & dirPort[1] & dirPort[2];
           }
-          PORTD = PORTD & pulsePort[0];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
+          PORTD = PORTD & pulsePort[2];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[2]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          PORTD = PORTD & pulsePort[2];//Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           if (String(dir) == "-") { //DIR HIGH
             PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
@@ -366,9 +366,9 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
     else {
       client.print("None; ");
     }
-    digitalWrite(A2,HIGH);// disable a
-    digitalWrite(A3,HIGH);// disable c
-    digitalWrite(A4,HIGH);//disable b
+    digitalWrite(A2,HIGH);// disable c
+    digitalWrite(A3,HIGH);// disable b
+    digitalWrite(A4,HIGH);// disable a
     client.print("Saving Position</br>");
     setInfo(pos,"pos",client);
 }
