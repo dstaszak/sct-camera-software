@@ -188,52 +188,9 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       }
     }
   }
-//  if (String(Motor) == "A") {
-  if (String(Motor) == "C") {
+  if (String(Motor) == "A") {
     mot1=pos[0]+sgn*steps;
     if( mot1<0 || mot1>rng[0]){
-      client.print("Motion exceedes range. Try moving less </br>");
-    }
-    else{
-      digitalWrite(A2,LOW);
-      for (int i = 0; i < steps; i++) {
-        if(AINT==0){
-          PORTD = PORTD & pulsePort[0];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[0];//Pulse LOW
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          stps += 1;
-          pos[0]+=sgn;
-        }
-      }
-    }
-  }
-//  if (String(Motor) == "B") {
-  if (String(Motor) == "A") {
-    mot2=pos[1]+sgn*steps;
-    if( mot2<0 || mot2>rng[0]){
-      client.print("Motion exceedes range. Try moving less </br>");
-    }
-    else{
-      digitalWrite(A4,LOW);
-      for (int i = 0; i < steps; i++) {
-       if(AINT==0){
-          PORTD = PORTD & pulsePort[1];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[1];//Pulse LOW
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          stps += 1;
-          pos[1]+=sgn;
-        }
-      }
-    }
-  }
-//  if (String(Motor) == "C") {
-  if (String(Motor) == "B") {
-    mot3=pos[2]+sgn*steps;
-    if( mot3<0 || mot3>rng[0]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
@@ -246,16 +203,78 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           PORTD = PORTD & pulsePort[2];//Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
+          pos[0]+=sgn;
+        }
+      }
+    }
+  }
+  if (String(Motor) == "B") {
+    mot2=pos[1]+sgn*steps;
+    if( mot2<0 || mot2>rng[0]){
+      client.print("Motion exceedes range. Try moving less </br>");
+    }
+    else{
+      digitalWrite(A2,LOW);
+      for (int i = 0; i < steps; i++) {
+       if(AINT==0){
+          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          stps += 1;
+          pos[1]+=sgn;
+        }
+      }
+    }
+  }
+  if (String(Motor) == "C") {
+    mot3=pos[2]+sgn*steps;
+    if( mot3<0 || mot3>rng[0]){
+      client.print("Motion exceedes range. Try moving less </br>");
+    }
+    else{
+      digitalWrite(A4,LOW);
+      for (int i = 0; i < steps; i++) {
+        if(AINT==0){
+          PORTD = PORTD & pulsePort[1];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          PORTD = PORTD & pulsePort[1];//Pulse LOW
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          stps += 1;
           pos[2]+=sgn;
         }
       }
     }
   }
-//  if (String(Motor) == "AB") {
-  if (String(Motor) == "AC") {
+  if (String(Motor) == "AB") {
     mot1=pos[0]+sgn*steps;
     mot2=pos[1]+sgn*steps;
     if( mot1<0 || mot1>rng[0] ||mot2<0 || mot2>rng[0]){
+      client.print("Motion exceedes range. Try moving less </br>");
+    }
+    else{
+      digitalWrite(A2,LOW);
+      digitalWrite(A3,LOW);
+      for (int i = 0; i < steps; i++) {
+        if(AINT==0){
+          PORTD = PORTD & pulsePort[2] & pulsePort[0]; //Pulse LOW
+          PORTD = PORTD | ~(pulsePort[2] & pulsePort[0]); //Pulse HIGH
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          PORTD = PORTD & pulsePort[2] & pulsePort[0]; //Pulse LOW
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          stps += 1;
+          pos[0]+=sgn;
+          pos[1]+=sgn;
+        }
+      }
+    }
+  }
+  if (String(Motor) == "BC") {
+    mot2=pos[1]+sgn*steps;
+    mot3=pos[2]+sgn*steps;
+    if( mot2<0 || mot2>rng[0]||mot3<0 || mot3>rng[0]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
@@ -269,52 +288,27 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           PORTD = PORTD & pulsePort[0] & pulsePort[1]; //Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
-          pos[0]+=sgn;
-          pos[1]+=sgn;
-        }
-      }
-    }
-  }
-//  if (String(Motor) == "BC") {
-  if (String(Motor) == "AB") {
-    mot2=pos[1]+sgn*steps;
-    mot3=pos[2]+sgn*steps;
-    if( mot2<0 || mot2>rng[0]||mot3<0 || mot3>rng[0]){
-      client.print("Motion exceedes range. Try moving less </br>");
-    }
-    else{
-      digitalWrite(A3,LOW);
-      digitalWrite(A4,LOW);
-      for (int i = 0; i < steps; i++) {
-        if(AINT==0){
-          PORTD = PORTD & pulsePort[1] & pulsePort[2]; //Pulse LOW
-          PORTD = PORTD | ~(pulsePort[1] & pulsePort[2]); //Pulse HIGH
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[1] & pulsePort[2]; //Pulse LOW
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          stps += 1;
           pos[1]+=sgn;
           pos[2]+=sgn;
         }
       }
     }
   }
-//  if ( String(Motor) == "AC") {
-  if ( String(Motor) == "BC") {
+  if ( String(Motor) == "AC") {
     mot1=pos[0]+sgn*steps;
     mot3=pos[2]+sgn*steps;
     if( mot1<0 || mot1>rng[0] ||mot3<0 || mot3>rng[0]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
-      digitalWrite(A2,LOW);
       digitalWrite(A3,LOW);
+      digitalWrite(A4,LOW);
       for (int i = 0; i < steps; i++) {
         if(AINT==0){
-          PORTD = PORTD & pulsePort[0] & pulsePort[2]; //Pulse LOW
-          PORTD = PORTD | ~(pulsePort[0] & pulsePort[2]); //Pulse HIGH
+          PORTD = PORTD & pulsePort[2] & pulsePort[1]; //Pulse LOW
+          PORTD = PORTD | ~(pulsePort[2] & pulsePort[1]); //Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[0] & pulsePort[2]; //Pulse LOW
+          PORTD = PORTD & pulsePort[2] & pulsePort[1]; //Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[0]+=sgn;
@@ -323,47 +317,6 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       }
     }
   }
-  if (String(Motor) == "CS") {
-    mot2=pos[1]+sgn*steps/2;
-    mot3=pos[2]-sgn*steps/2;
-    if( mot2<0 || mot2>rng[1] ||mot3<0 || mot3>rng[2]){
-      client.print("Motion exceedes range. Try moving less </br>");
-    }
-    else{
-      digitalWrite(A4,LOW);
-      digitalWrite(A3,LOW);
-      for (int i = 0; i < steps/2; i++) {
-        if(AINT==0){
-          PORTD = PORTD & pulsePort[1];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[1];//Pulse LOW
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          if (String(dir) == "+") { //DIR HIGH
-            PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
-          }
-          if (String(dir) == "-") { //DIR LOW
-            PORTB &= dirPort[0] & dirPort[1] & dirPort[2];
-          }
-          PORTD = PORTD & pulsePort[2];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[2]);//Pulse HIGH
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[2];//Pulse LOW
-          for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          if (String(dir) == "-") { //DIR HIGH
-            PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
-          }
-          if (String(dir) == "+") { //DIR LOW
-            PORTB &= dirPort[0] & dirPort[1] & dirPort[2];
-          }
-          stps += 1;
-          pos[1]+=sgn;
-          pos[2]-=sgn;
-        }
-      }
-    }
-  }
-/*
   if (String(Motor) == "CS") {
     mot1=pos[0]+sgn*steps/2;
     mot2=pos[1]-sgn*steps/2;
@@ -372,13 +325,13 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
     }
     else{
       digitalWrite(A2,LOW);
-      digitalWrite(A4,LOW);
+      digitalWrite(A3,LOW);
       for (int i = 0; i < steps/2; i++) {
         if(AINT==0){
-          PORTD = PORTD & pulsePort[0];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
+          PORTD = PORTD & pulsePort[2];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[2]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          PORTD = PORTD & pulsePort[2];//Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           if (String(dir) == "+") { //DIR HIGH
             PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
@@ -386,10 +339,10 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           if (String(dir) == "-") { //DIR LOW
             PORTB &= dirPort[0] & dirPort[1] & dirPort[2];
           }
-          PORTD = PORTD & pulsePort[1];//Pulse LOW
-          PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
+          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
-          PORTD = PORTD & pulsePort[1];//Pulse LOW
+          PORTD = PORTD & pulsePort[0];//Pulse LOW
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           if (String(dir) == "-") { //DIR HIGH
             PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
@@ -404,7 +357,6 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       }
     }
   }
-*/
   client.print("Motion Finished; ");
   client.print("Interruptions: ");
     if(AINT == 1){
