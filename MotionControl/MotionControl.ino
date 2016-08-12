@@ -10,7 +10,6 @@ int rng[3];
 int algn[3];
 String startupMsgs;
 volatile int msgsSent;
-volatile int AINT = 0;
 volatile int stps = 0;
 
 void getInfo(String item, YunClient client){
@@ -127,21 +126,14 @@ void setup() {
   digitalWrite(A2,HIGH);// disable c
   digitalWrite(A3,HIGH);// disable b
   digitalWrite(A4,HIGH);// disable a
-  pinMode(3, OUTPUT);// setup interruption pin
-  attachInterrupt(digitalPinToInterrupt(3), rupt, RISING);//magnetic switch interrupt setup --- no switch, keeping this framework in case we want to do something later
   Bridge.begin();
   server.listenOnLocalhost();
   server.begin();
   YunClient client = server.accept();
   //try and get the saved position, range and alignment data
 }
-void rupt() {
-  AINT = 1;
-  //step motor function wont move if this is 1.
-}
 
 void stepMotor(String Motor, long steps, String dir, YunClient client) {
-  AINT=0;
   stps=0;
   int mot1;
   int mot2;
@@ -172,7 +164,6 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       digitalWrite(A3,LOW);
       digitalWrite(A4,LOW);
       for (int i = 0; i < steps; i++) {
-        if(AINT==0){
           PORTD &= pulsePort[0] & pulsePort[1] & pulsePort[2]; //Pulse LOW
           PORTD |= ~(pulsePort[0] & pulsePort[1] & pulsePort[2]);
           //delay(1);
@@ -184,7 +175,6 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           pos[0]+=sgn;
           pos[1]+=sgn;
           pos[2]+=sgn;
-        }
       }
     }
   }
@@ -196,7 +186,6 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
     else{
       digitalWrite(A4,LOW);
       for (int i = 0; i < steps; i++) {
-        if(AINT==0){
           PORTD = PORTD & pulsePort[1];//Pulse LOW
           PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
@@ -204,19 +193,17 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[0]+=sgn;
-        }
       }
     }
   }
   if (String(Motor) == "B") {
     mot2=pos[1]+sgn*steps;
-    if( mot2<0 || mot2>rng[0]){
+    if( mot2<0 || mot2>rng[1]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
       digitalWrite(A3,LOW);
       for (int i = 0; i < steps; i++) {
-       if(AINT==0){
           PORTD = PORTD & pulsePort[2];//Pulse LOW
           PORTD = PORTD | ~(pulsePort[2]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
@@ -224,19 +211,17 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[1]+=sgn;
-        }
       }
     }
   }
   if (String(Motor) == "C") {
     mot3=pos[2]+sgn*steps;
-    if( mot3<0 || mot3>rng[0]){
+    if( mot3<0 || mot3>rng[2]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
       digitalWrite(A2,LOW);
       for (int i = 0; i < steps; i++) {
-        if(AINT==0){
           PORTD = PORTD & pulsePort[0];//Pulse LOW
           PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
@@ -244,21 +229,19 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
           stps += 1;
           pos[2]+=sgn;
-        }
       }
     }
   }
   if (String(Motor) == "AB") {
     mot1=pos[0]+sgn*steps;
     mot2=pos[1]+sgn*steps;
-    if( mot1<0 || mot1>rng[0] ||mot2<0 || mot2>rng[0]){
+    if( mot1<0 || mot1>rng[0] ||mot2<0 || mot2>rng[1]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
       digitalWrite(A3,LOW);
       digitalWrite(A4,LOW);
       for (int i = 0; i < steps; i++) {
-        if(AINT==0){
           PORTD = PORTD & pulsePort[1] & pulsePort[2]; //Pulse LOW
           PORTD = PORTD | ~(pulsePort[1] & pulsePort[2]); //Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
@@ -267,21 +250,19 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           stps += 1;
           pos[0]+=sgn;
           pos[1]+=sgn;
-        }
       }
     }
   }
   if (String(Motor) == "BC") {
     mot2=pos[1]+sgn*steps;
     mot3=pos[2]+sgn*steps;
-    if( mot2<0 || mot2>rng[0]||mot3<0 || mot3>rng[0]){
+    if( mot2<0 || mot2>rng[1]||mot3<0 || mot3>rng[2]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
       digitalWrite(A2,LOW);
       digitalWrite(A3,LOW);
       for (int i = 0; i < steps; i++) {
-        if(AINT==0){
           PORTD = PORTD & pulsePort[0] & pulsePort[2]; //Pulse LOW
           PORTD = PORTD | ~(pulsePort[0] & pulsePort[2]); //Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
@@ -290,21 +271,19 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           stps += 1;
           pos[1]+=sgn;
           pos[2]+=sgn;
-        }
       }
     }
   }
   if ( String(Motor) == "AC") {
     mot1=pos[0]+sgn*steps;
     mot3=pos[2]+sgn*steps;
-    if( mot1<0 || mot1>rng[0] ||mot3<0 || mot3>rng[0]){
+    if( mot1<0 || mot1>rng[0] ||mot3<0 || mot3>rng[2]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
       digitalWrite(A2,LOW);
       digitalWrite(A4,LOW);
       for (int i = 0; i < steps; i++) {
-        if(AINT==0){
           PORTD = PORTD & pulsePort[0] & pulsePort[1]; //Pulse LOW
           PORTD = PORTD | ~(pulsePort[0] & pulsePort[1]); //Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
@@ -313,21 +292,19 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           stps += 1;
           pos[0]+=sgn;
           pos[2]+=sgn;
-        }
       }
     }
   }
   if (String(Motor) == "CS") {
     mot1=pos[0]+sgn*steps/2;
     mot2=pos[1]-sgn*steps/2;
-    if( mot1<0 || mot1>rng[0] ||mot2<0 || mot2>rng[0]){
+    if( mot1<0 || mot1>rng[0] ||mot2<0 || mot2>rng[1]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
       digitalWrite(A3,LOW);
       digitalWrite(A4,LOW);
       for (int i = 0; i < steps/2; i++) {
-        if(AINT==0){
           PORTD = PORTD & pulsePort[1];//Pulse LOW
           PORTD = PORTD | ~(pulsePort[1]);//Pulse HIGH
           for(int k = 0; k<1000;k++){asm("");}//delay(1);
@@ -353,24 +330,23 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           stps += 1;
           pos[0]+=sgn;
           pos[1]-=sgn;
-        }
       }
     }
   }
   client.print("Motion Finished; ");
-  client.print("Interruptions: ");
-    if(AINT == 1){
-      client.print(String(stps));
-      client.print(" steps taken before interruption.; ");
-    }
-    else {
-      client.print("None; ");
-    }
-    digitalWrite(A2,HIGH);// disable c
-    digitalWrite(A3,HIGH);// disable b
-    digitalWrite(A4,HIGH);// disable a
-    client.print("Saving Position</br>");
-    setInfo(pos,"pos",client);
+  digitalWrite(A2,HIGH);// disable c
+  digitalWrite(A3,HIGH);// disable b
+  digitalWrite(A4,HIGH);// disable a
+  client.print("Saving Position</br>");
+  setInfo(pos,"pos",client);
+  String moString;
+  moString = getTimeStamp() + " -- Motion Finished -- " + String(stps) + " step(s)\n";
+  moString += "\tNew Position: " + String(pos[0]) + " " + String(pos[1]) + " " + String(pos[2]);
+  File dataFile = FileSystem.open("/mnt/sda1/datalog.txt", FILE_APPEND);
+  if (dataFile) {
+    dataFile.println(moString);
+    dataFile.close();
+  }
 }
 
 void process(YunClient client) {
@@ -386,21 +362,28 @@ void process(YunClient client) {
     commands = client.readStringUntil('/');
     commands.trim();
     command[2] = commands;
+
     client.print("Commands recieved: ");
-   // client.print("Dir ");
-    client.print(command[0]);
+    client.print(command[0]); //Dir
     client.print(" :");
-   // client.print("Steps ");
-    client.print(command[1]);
+    client.print(command[1]); //Steps
     client.print(" :");
-    //client.print("Motors ");
-    client.print(command[2]);
+    client.print(command[2]); //Motors
     client.print("</br>");
+
+    File dataFile = FileSystem.open("/mnt/sda1/datalog.txt", FILE_APPEND);
+    String outString;
+    outString = getTimeStamp()+ " -- Commands recieved: ";
+    outString += command[0] + " :" + command[1] + " :" + command[2];  
+    if (dataFile) {
+      dataFile.println(outString);
+      dataFile.close();  
+    } 
+
+    String newInfo = "";
+ 
     //commands[0,1,2] = Dir, Steps, Motor
-    if(command[0].indexOf("interruptions")>=0){
-      client.print(AINT);
-    }
-    else if(command[0].indexOf("getPos")>=0){
+    if(command[0].indexOf("getPos")>=0){
       getInfo("pos",client);
       client.print("Position: A-");
       client.print(String(pos[0]));
@@ -409,6 +392,7 @@ void process(YunClient client) {
       client.print("  C-");
       client.print(String(pos[2]));
       client.print("</br>");
+      newInfo += String(pos[0]) + " " + String(pos[1]) + " " + String(pos[2]);
     }
     else if(command[0].indexOf("setAlgn")>=0){
       setInfo(pos,"algn",client);
@@ -417,6 +401,7 @@ void process(YunClient client) {
       setInfo(pos,"rng",client);
     }
     else if(command[0].indexOf("getAlgn")>=0){
+      getInfo("algn",client);
       client.print("Alignment: A-");
       client.print(String(algn[0]));
       client.print("  B-");
@@ -424,6 +409,7 @@ void process(YunClient client) {
       client.print("  C-");
       client.print(String(algn[2]));
       client.print("</br>");
+      newInfo += String(algn[0]) + " " + String(algn[1]) + " " + String(algn[2]);
     }
     else if(command[0].indexOf("getRng")>=0){
       getInfo("rng",client);
@@ -434,45 +420,28 @@ void process(YunClient client) {
       client.print("  C-");
       client.print(String(rng[2]));
       client.print("</br>");
+      newInfo += String(rng[0]) + " " + String(rng[1]) + " " + String(rng[2]);
     }
     //below is the testing loop
     else if(command[0].indexOf("cta")>=0){
       for(int gf =0; gf<50; gf++){
         client.print("loop: ");
         client.println(gf);
-      /*stepMotor(String("All"), long(5000), String("+"), client);
-      stepMotor(String("All"), long(10000), String("-"), client);
-      stepMotor(String("All"), long(10000), String("+"), client);
-      stepMotor(String("All"), long(5000), String("-"), client);
-      
-      stepMotor(String("CS"), long(10000), String("+"), client);
-      stepMotor(String("CS"), long(20000), String("-"), client);
-      stepMotor(String("CS"), long(20000), String("+"), client);
-      stepMotor(String("CS"), long(10000), String("-"), client);
-      
-      stepMotor(String("AB"), long(5000), String("+"), client);
-      stepMotor(String("AB"), long(10000), String("-"), client);
-      stepMotor(String("AB"), long(10000), String("+"), client);
-      stepMotor(String("AB"), long(5000), String("-"), client);
-      
-      stepMotor(String("A"), long(5000), String("+"), client);
-      stepMotor(String("A"), long(10000), String("-"), client);
-      stepMotor(String("A"), long(10000), String("+"), client);
-      stepMotor(String("A"), long(5000), String("-"), client);
-  
-      stepMotor(String("B"), long(5000), String("+"), client);
-      stepMotor(String("B"), long(10000), String("-"), client);
-      stepMotor(String("B"), long(10000), String("+"), client);
-      stepMotor(String("B"), long(5000), String("-"), client);
-  */
-      stepMotor(String("C"), long(5000), String("+"), client);
-      stepMotor(String("C"), long(10000), String("-"), client);
-      stepMotor(String("C"), long(10000), String("+"), client);
-      stepMotor(String("C"), long(5000), String("-"), client);
+        stepMotor(String("All"), long(5000), String("+"), client);
+        stepMotor(String("All"), long(10000), String("-"), client);
+        stepMotor(String("All"), long(10000), String("+"), client);
+        stepMotor(String("All"), long(5000), String("-"), client);
       }
     }
     else {
       stepMotor( command[2], long(command[1].toFloat()), command[0], client );
+    }
+    if (newInfo.length() > 0) {
+       File dataFileX = FileSystem.open("/mnt/sda1/datalog.txt", FILE_APPEND);
+       if (dataFileX) {
+         dataFileX.println(newInfo);
+         dataFileX.close();  
+       } 
     }
   }
   else {
@@ -480,9 +449,43 @@ void process(YunClient client) {
      getInfo("pos",client);
      getInfo("algn",client);
      client.print("If needed please complete startup manually. See below </br>");
-    client.print(startupMsgs);
-    msgsSent=1;
+     client.print(startupMsgs);
+     msgsSent=1;
+
+     // Record when it started up and initial position, range, alignment values
+     String outString;
+     outString = "\n\nStarting up Motion Control --- " + getTimeStamp();
+     outString += "\n\tPosition loaded:  " + String(pos[0]) + " " + String(pos[1]) + " " + String(pos[2]);
+     outString += "\n\tRange loaded:  " + String(rng[0]) + " " + String(rng[1]) + " " + String(rng[2]);
+     outString += "\n\tAlignment loaded:  " + String(algn[0]) + " " + String(algn[1]) + " " + String(algn[2]);
+     File dataFile = FileSystem.open("/mnt/sda1/datalog.txt", FILE_APPEND);
+     if (dataFile) {
+       dataFile.println(outString);
+       dataFile.close();
+     }
+     else {
+       client.print("No Log file found, manually create it and restart.  (/mnt/sda1/datalog.txt) </br>");
+     }
   }
+}
+
+// This function return a string with the time stamp
+String getTimeStamp() {
+  String result;
+  Process time;
+  // date is a command line utility to get the date and the time
+  // in different formats depending on the additional parameter
+  time.begin("date");
+  time.addParameter("+%D-%T");  // parameters: D for the complete date mm/dd/yy
+  //             T for the time hh:mm:ss
+  time.run();  // run the command
+  // read the output of the command
+  while (time.available() > 0) {
+    char c = time.read();
+    if (c != '\n')
+      result += c;
+  }
+  return result;
 }
 
 void loop() {
