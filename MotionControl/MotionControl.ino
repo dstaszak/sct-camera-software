@@ -156,7 +156,7 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
     mot1=pos[0]+sgn*steps;
     mot2=pos[1]+sgn*steps;
     mot3=pos[2]+sgn*steps;
-    if( mot1<0 || mot1>rng[0] ||mot2<0 || mot2>rng[0]||mot3<0 || mot3>rng[0]){
+    if( mot1<0 || mot1>rng[0] ||mot2<0 || mot2>rng[1]||mot3<0 || mot3>rng[2]){
       client.print("Motion exceedes range. Try moving less </br>");
     }
     else{
@@ -232,6 +232,7 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
       }
     }
   }
+/*
   if (String(Motor) == "AB") {
     mot1=pos[0]+sgn*steps;
     mot2=pos[1]+sgn*steps;
@@ -250,6 +251,48 @@ void stepMotor(String Motor, long steps, String dir, YunClient client) {
           stps += 1;
           pos[0]+=sgn;
           pos[1]+=sgn;
+      }
+    }
+  }
+*/
+  if (String(Motor) == "AB") {
+    mot1=pos[0]+sgn*steps;
+    mot2=pos[1]+sgn*steps;
+    mot3=pos[2]-sgn*steps;
+    if( mot1<0 || mot1>rng[0] ||mot2<0 || mot2>rng[1] || mot3<0 || mot3>rng[2]){
+      client.print("Motion exceedes range. Try moving less </br>");
+    }
+    else{
+      digitalWrite(A2,LOW);
+      digitalWrite(A3,LOW);
+      digitalWrite(A4,LOW);
+      for (int i = 0; i < steps; i++) {
+          PORTD = PORTD & pulsePort[1] & pulsePort[2]; //Pulse LOW
+          PORTD = PORTD | ~(pulsePort[1] & pulsePort[2]); //Pulse HIGH
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          PORTD = PORTD & pulsePort[1] & pulsePort[2]; //Pulse LOW
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          if (String(dir) == "+") { //DIR HIGH
+            PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
+          }
+          if (String(dir) == "-") { //DIR LOW
+            PORTB &= dirPort[0] & dirPort[1] & dirPort[2];
+          }
+          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          PORTD = PORTD | ~(pulsePort[0]);//Pulse HIGH
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          PORTD = PORTD & pulsePort[0];//Pulse LOW
+          for(int k = 0; k<1000;k++){asm("");}//delay(1);
+          if (String(dir) == "-") { //DIR HIGH
+            PORTB |=  ~(dirPort[0] & dirPort[1] & dirPort[2]);
+          }
+          if (String(dir) == "+") { //DIR LOW
+            PORTB &= dirPort[0] & dirPort[1] & dirPort[2];
+          }
+          stps += 1;
+          pos[0]+=sgn;
+          pos[1]+=sgn;
+	  pos[2]-=sgn;
       }
     }
   }
